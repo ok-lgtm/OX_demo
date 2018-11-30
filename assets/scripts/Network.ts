@@ -5,6 +5,10 @@ export default class Network {
     private static _instance = null
     private static _websocket:WebSocket = null
     private customEvent:EventCustoms = null
+    private _wsAddress:string = null
+    private bReconnect:boolean = false
+    private reconnectNum:number = 5
+    private reconnectCount:number = 0
 
     public static getInstacne():Network{
         if(Network._instance == null){
@@ -63,14 +67,31 @@ export default class Network {
     }
 
     private _onOpen(){
-        let data = {}
-        this.customEvent.dispatch('connected', data)
+        this.reconnectCount = 0
+        if(!this.bReconnect){
+            let data = {}
+            this.customEvent.dispatch('connected', data)
+        }
+        this._wsAddress = Network._websocket.url
     }
 
     private _onClose(event){
         if(Network._websocket){
             Network._websocket.close()
             Network._websocket = null
+        }
+        
+        let self = this
+        if(this.reconnectCount < this.reconnectNum){
+            setTimeout(function(){
+                self.reconnectCount++
+                console.log("重连"+self.reconnectCount + "次")
+                self.bReconnect = true
+                self.connect(self._wsAddress)
+            }, 5000)
+        }else{
+            this.reconnectCount = 0
+            console.log("无法连接服务器")
         }
         
         //this.customEvent.dispatch('close', event.data)
@@ -91,6 +112,10 @@ export default class Network {
         }
 
         if(data == null || data.type == "Ping" || data.type == "Pong"){
+            if(data.type == "Ping"){
+                this._Pong()
+            }
+
             return
         }
 
@@ -100,5 +125,24 @@ export default class Network {
 
     private _onError(event){
         //this.customEvent.dispatch('error', event.data)
+    }
+
+    private _Ping(){
+        let data = {
+            type:"Ping",
+            data:{}
+        }
+
+        this.send(data)
+    }
+
+    private _Pong(){
+        let data = {
+            type:"Pong",
+            data:{}
+        }
+
+        console.log("客户端回复Pong消息")
+        this.send(data)
     }
 }
