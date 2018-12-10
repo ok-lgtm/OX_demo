@@ -1,6 +1,8 @@
 import GlobalConfig from "../config/GlobalConfig"
 import Network from "../Network"
 import EventCustom from "../CustomEvents"
+import DataManager from "../DataManager"
+import PlayerInfo from "../PlayerInfo";
 
 enum Btn_Tag{
     BTN_WX_TAG = 100,
@@ -22,6 +24,8 @@ export default class LoginScene extends cc.Component {
     network:Network = null
 
     customEvent:EventCustom = null
+
+    dataMgr:DataManager = null
 
 
     onLoad () {
@@ -52,6 +56,8 @@ export default class LoginScene extends cc.Component {
 
         this.network = Network.getInstacne()
         this.customEvent = EventCustom.getInstacne()
+        this.dataMgr = DataManager.getInstance()
+        this.customEvent.listen('message', this.onNetworkMessage.bind(this), this)
     }
 
     onButtonClicked(event){
@@ -76,5 +82,32 @@ export default class LoginScene extends cc.Component {
             }
         }
         
+    }
+
+    onNetworkMessage(event){
+        cc.log(event)
+        let data = event.data
+        if(data && data.Code != 0){
+            cc.log("LoginScene onNetworkMessage error:", event.Code)
+            return
+        }
+
+        if(data.Data && data.Data.Info){
+            let info = data.Data.Info
+            let playerInfo:PlayerInfo = new PlayerInfo()
+            playerInfo.userID = info.ID
+            playerInfo.nickName = info.Nickname
+            playerInfo.avatar = info.Avatar
+            playerInfo.coin = info.Coin
+            playerInfo.sex = info.Sex
+            GlobalConfig._meUserID = info.ID
+            
+            this.dataMgr.setPlayerInfoNotUserID(playerInfo)
+
+            cc.director.preloadScene('Hall', function(){
+                cc.log("Hall 加载完成 playerInfo:", playerInfo)
+                cc.director.loadScene('Hall')
+            })
+        }
     }
 }

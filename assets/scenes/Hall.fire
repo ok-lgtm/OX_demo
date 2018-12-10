@@ -79,6 +79,9 @@
     "_components": [
       {
         "__id__": 53
+      },
+      {
+        "__id__": 54
       }
     ],
     "_prefab": null,
@@ -2284,5 +2287,23 @@
     },
     "_fitWidth": true,
     "_fitHeight": true
+  },
+  {
+    "__type__": "a6c41k6FkhESKADlCEA1QZx",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "labNickName": {
+      "__id__": 16
+    },
+    "labUserID": {
+      "__id__": 18
+    },
+    "labCoins": {
+      "__id__": 21
+    }
   }
 ]

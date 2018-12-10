@@ -8,4 +8,6 @@ export default class GlobalConfig {
    static _bDevMode:boolean = true
 
    static _testUserCode:string = "1"
+
+   static _meUserID:number = 0
 }
